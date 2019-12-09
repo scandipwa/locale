@@ -42,7 +42,7 @@ class Page extends OriginalPage
      * @param GeneratorPool $generatorPool
      * @param RendererFactory $pageConfigRendererFactory
      * @param Reader $pageLayoutReader
-     * @param $template
+     * @param string $template,
      * @param bool $isIsolated
      * @param EntitySpecificHandlesList|null $entitySpecificHandlesList
      * @param null $action
@@ -57,7 +57,7 @@ class Page extends OriginalPage
         GeneratorPool $generatorPool,
         RendererFactory $pageConfigRendererFactory,
         Reader $pageLayoutReader,
-        $template,
+        string $template,
         $isIsolated = false,
         EntitySpecificHandlesList $entitySpecificHandlesList = null,
         $action = null
