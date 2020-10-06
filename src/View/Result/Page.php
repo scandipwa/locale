@@ -102,4 +102,11 @@ class Page extends OriginalPage
 
         return $this->getStaticFile($filePath);
     }
+
+    public function getLocaleCode()
+    {
+        $haystack = $this->localeResolver->getLocale();
+
+        return strstr($haystack, '_', true);
+    }
 }
