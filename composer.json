@@ -8,7 +8,7 @@
     "require": {
         "magento/framework": "*",
         "magento/module-deploy": "^100.3",
-        "scandipwa/route717": "^1"
+        "scandipwa/route717": "^2"
     },
     "autoload": {
         "files": [
