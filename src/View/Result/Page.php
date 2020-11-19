@@ -45,6 +45,7 @@ class Page extends OriginalPage
      * @param bool $isIsolated
      * @param EntitySpecificHandlesList|null $entitySpecificHandlesList
      * @param null $action
+     * @param array $rootTemplatePool
      */
     public function __construct(
         Resolver $localeResolver,
@@ -59,7 +60,8 @@ class Page extends OriginalPage
         string $template,
         $isIsolated = false,
         EntitySpecificHandlesList $entitySpecificHandlesList = null,
-        $action = null
+        $action = null,
+        $rootTemplatePool = []
     ) {
         parent::__construct(
             $context,
@@ -73,7 +75,8 @@ class Page extends OriginalPage
             $template,
             $isIsolated,
             $entitySpecificHandlesList,
-            $action
+            $action,
+            $rootTemplatePool
         );
 
         $this->localeResolver = $localeResolver;
