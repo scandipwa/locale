@@ -158,7 +158,7 @@ class PackagePool extends MagentoPackagePool
         return array_filter(
             $array,
             function ($key) use ($quotedKeysToFind, $valueCheck, $array) {
-                if (!preg_match('/(' . implode($quotedKeysToFind, '|') . ')/i', $key)) {
+                if (!preg_match('/(' . implode('|', $quotedKeysToFind) . ')/i', $key)) {
                     return false;
                 }
 
