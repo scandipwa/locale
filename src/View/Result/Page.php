@@ -82,34 +82,28 @@ class Page extends OriginalPage
         $this->localeResolver = $localeResolver;
     }
 
-    protected function getThemeFolder($url)
+    protected function getStaticDirectory($url)
     {
-        return 'Magento_Theme/' . $url;
+        return join('/', array('Magento_Theme/static', $url));
     }
 
     public function getStaticFile($url)
     {
         $asset = $this->assetRepo->createAsset(
-            $this->getThemeFolder($url)
+            $this->getStaticDirectory($url)
         );
 
         return $asset->getUrl();
     }
 
-    public function getStaticBundleFile()
-    {
-        $filePath = sprintf(
-            '%s.bundle.js',
-            $this->localeResolver->getLocale()
-        );
+    public function getLanguageCode() {
+        $haystack = $this->getLocaleCode();
 
-        return $this->getStaticFile($filePath);
+        return strstr($haystack, '_', true);
     }
 
     public function getLocaleCode()
     {
-        $haystack = $this->localeResolver->getLocale();
-
-        return strstr($haystack, '_', true);
+        return $this->localeResolver->getLocale();
     }
 }
