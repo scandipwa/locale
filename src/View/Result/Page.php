@@ -11,6 +11,8 @@
 
 namespace ScandiPWA\Locale\View\Result;
 
+use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Locale\Resolver;
 use Magento\Framework\Translate\InlineInterface;
 use Magento\Framework\View\Element\Template\Context;
@@ -29,6 +31,10 @@ class Page extends OriginalPage
      * @var Resolver
      */
     private $localeResolver;
+    /**
+     * @var DirectoryList
+     */
+    protected $directoryList;
 
     /**
      * Page constructor.
@@ -41,7 +47,8 @@ class Page extends OriginalPage
      * @param GeneratorPool $generatorPool
      * @param RendererFactory $pageConfigRendererFactory
      * @param Reader $pageLayoutReader
-     * @param string $template,
+     * @param string $template ,
+     * @param DirectoryList $directoryList
      * @param bool $isIsolated
      * @param EntitySpecificHandlesList|null $entitySpecificHandlesList
      * @param null $action
@@ -58,6 +65,7 @@ class Page extends OriginalPage
         RendererFactory $pageConfigRendererFactory,
         Reader $pageLayoutReader,
         string $template,
+        DirectoryList $directoryList,
         $isIsolated = false,
         EntitySpecificHandlesList $entitySpecificHandlesList = null,
         $action = null,
@@ -80,20 +88,7 @@ class Page extends OriginalPage
         );
 
         $this->localeResolver = $localeResolver;
-    }
-
-    protected function getStaticDirectory($url)
-    {
-        return join('/', array('Magento_Theme/static', $url));
-    }
-
-    public function getStaticFile($url)
-    {
-        $asset = $this->assetRepo->createAsset(
-            $this->getStaticDirectory($url)
-        );
-
-        return $asset->getUrl();
+        $this->directoryList = $directoryList;
     }
 
     public function getLanguageCode() {
@@ -105,5 +100,50 @@ class Page extends OriginalPage
     public function getLocaleCode()
     {
         return $this->localeResolver->getLocale();
+    }
+
+    protected function getJsBundleLocation() {
+        return join('/', array(
+            $this->directoryList->getPath(DirectoryList::STATIC_VIEW),
+            $this->assetRepo->getStaticViewFileContext()->getPath(),
+            'Magento_Theme',
+            'static',
+            'js'
+        ));
+    }
+
+    protected function getLocaleChunkName() {
+        $locale = $this->getLocaleCode();
+        $jsBundleLocation = $this->getJsBundleLocation();
+        $jsFileList = scandir($jsBundleLocation);
+
+        $necessaryFileRegExp = "/$locale\\.[^.]+\\.chunk\\.js$/";
+        return current(array_filter(
+            $jsFileList,
+            function($filename) use ($necessaryFileRegExp) {
+                return preg_match($necessaryFileRegExp, $filename);
+            }
+        ));
+    }
+
+    public function getLocaleChunkUrl() {
+        $chunkName = $this->getLocaleChunkName();
+        if (!$chunkName) {
+            return null;
+        }
+
+        $assetPath = join('/', array(
+            'Magento_Theme',
+            'static',
+            'js',
+            $chunkName
+        ));
+
+        try {
+            $asset = $this->assetRepo->createAsset($assetPath);
+            return $asset->getUrl();
+        } catch (LocalizedException $e) {
+            return null;
+        }
     }
 }
