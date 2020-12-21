@@ -103,9 +103,26 @@ class Page extends OriginalPage
     }
 
     protected function getJsBundleLocation() {
+        // Common directory for all locales
+        $staticViewDirectory = $this->directoryList->getPath(DirectoryList::STATIC_VIEW);
+
+        // Specific directory for each locale
+        $staticViewFileContextPathForLocale = $this->assetRepo->getStaticViewFileContext()->getPath();
+
+        // Always need to use en_US locale for locating bundles
+        $defaultLocale = "en_US";
+        $pattern = "/\/{$this->getLocaleCode()}$/";
+        $replacement = "/$defaultLocale";
+
+        $staticViewFileContextPathForDefaultLocale = preg_replace(
+            $pattern,
+            $replacement,
+            $staticViewFileContextPathForLocale
+        );
+
         return join('/', array(
-            $this->directoryList->getPath(DirectoryList::STATIC_VIEW),
-            $this->assetRepo->getStaticViewFileContext()->getPath(),
+            $staticViewDirectory,
+            $staticViewFileContextPathForDefaultLocale,
             'Magento_Theme',
             'static',
             'js'
@@ -115,7 +132,12 @@ class Page extends OriginalPage
     protected function getLocaleChunkName() {
         $locale = $this->getLocaleCode();
         $jsBundleLocation = $this->getJsBundleLocation();
-        $jsFileList = scandir($jsBundleLocation);
+
+        try {
+            $jsFileList = scandir($jsBundleLocation);
+        } catch (\Throwable $error) {
+            return null;
+        }
 
         $necessaryFileRegExp = "/$locale\\.[^.]+\\.chunk\\.js$/";
         return current(array_filter(
@@ -140,7 +162,7 @@ class Page extends OriginalPage
         ));
 
         try {
-            $asset = $this->assetRepo->createAsset($assetPath);
+            $asset = $this->assetRepo->createAsset($assetPath, ['locale' => 'en_US']);
             return $asset->getUrl();
         } catch (LocalizedException $e) {
             return null;
